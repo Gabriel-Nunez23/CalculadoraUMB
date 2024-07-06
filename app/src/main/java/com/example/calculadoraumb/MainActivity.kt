@@ -5,6 +5,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -44,12 +46,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    private fun formatNumber(number: String): String {
+        return try {
+            val numberFormat = NumberFormat.getNumberInstance(Locale.US)
+            val parsed = numberFormat.parse(number)
+            numberFormat.format(parsed)
+        } catch (e: Exception) {
+            number
+        }
+    }
+
     private fun handleOperation(op: String) {
         if (currentNumber.isNotEmpty()) {
             if (operation.isNotEmpty()) {
                 calculate()
             } else {
-                result = currentNumber.toDouble().toInt()
+                result = currentNumber.replace(",", "").toDouble().toInt()
             }
             operation = op
             currentNumber = ""
@@ -65,7 +77,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun handleNumber(number: String) {
         currentNumber += number
-        textViewResult?.text = currentNumber
+        textViewResult?.text = formatNumber(currentNumber)
     }
 
     private fun handleClear() {
@@ -77,14 +89,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun handleDelete() {
         if (currentNumber.isNotEmpty()) {
-            currentNumber = currentNumber.dropLast(1)
-            textViewResult?.text = if (currentNumber.isEmpty()) "0" else currentNumber
+            currentNumber = currentNumber.replace(",", "").dropLast(1)
+            textViewResult?.text = if (currentNumber.isEmpty()) "0" else formatNumber(currentNumber)
         }
     }
 
     private fun calculate() {
         if (currentNumber.isNotEmpty()) {
-            val secondNumber = currentNumber.toInt()
+            val secondNumber = currentNumber.replace(",", "").toDouble().toInt()
             result = when (operation) {
                 "+" -> result + secondNumber
                 "-" -> result - secondNumber
@@ -95,7 +107,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 else -> return
             }
-            textViewResult?.text = result.toString()
+            textViewResult?.text = formatNumber(result.toString())
             currentNumber = result.toString()
         }
     }
